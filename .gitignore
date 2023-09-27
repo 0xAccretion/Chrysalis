@@ -1,0 +1,14 @@
+*.dll
+*.exe
+*.pdb
+*.obj
+*.bin
+*.user
+*.suo
+*.cache
+*.log
+**/bin/
+**/obj/
+**/bin-debug/
+**/obj-debug/
+.DS_Store
