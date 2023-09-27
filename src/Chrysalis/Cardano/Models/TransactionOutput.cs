@@ -14,7 +14,7 @@ namespace Chrysalis.Cardano.Models;
 ///   , ? datum_hash : hash32 ; New
 ///   ]
 /// </remarks>
-public class TransactionOutput : ByteConvertibleBase, ICborObject<TransactionOutput>
+public class TransactionOutput  : ByteConvertibleCborBase, ICborObject<TransactionOutput>
 {
     /// <summary>
     /// Gets or sets the address of the transaction output.
@@ -61,7 +61,7 @@ public class TransactionOutput : ByteConvertibleBase, ICborObject<TransactionOut
     /// </summary>
     /// <param name="data">The byte array.</param>
     /// <returns>The deserialized transaction output.</returns>
-    public TransactionOutput FromCbor(byte[] data)
+    public override TransactionOutput FromCbor(byte[] data)
     {
         var reader = new CborReader(data);
         return FromCbor(reader);
@@ -72,7 +72,7 @@ public class TransactionOutput : ByteConvertibleBase, ICborObject<TransactionOut
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The deserialized transaction output.</returns>
-    public TransactionOutput FromCbor(CborReader reader)
+    public override TransactionOutput FromCbor(CborReader reader)
     {
         reader.ReadStartArray();
         Address = new ByteString(reader.ReadByteString());
@@ -96,13 +96,13 @@ public class TransactionOutput : ByteConvertibleBase, ICborObject<TransactionOut
     /// Serializes the transaction output to a byte array.
     /// </summary>
     /// <returns>The serialized transaction output.</returns>
-    public byte[] ToCbor()
+    public override byte[] ToCbor()
     {
         var writer = new CborWriter(CborConformanceMode.Strict);
         return ToCbor(writer).Encode();
     }
 
-    public CborWriter ToCbor(CborWriter writer)
+    public override CborWriter ToCbor(CborWriter writer)
     {
         writer.WriteStartArray(DatumHash == null ? 2 : 3);
         writer.WriteByteString(Address.ToByteArray());

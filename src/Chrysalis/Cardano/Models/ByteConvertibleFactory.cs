@@ -1,6 +1,5 @@
 ﻿namespace Chrysalis.Cardano.Models;
 
-
 public static class ByteConvertibleFactory
 {
     public static T? FromHex<T>(string hex) where T : ByteConvertibleBase, new()

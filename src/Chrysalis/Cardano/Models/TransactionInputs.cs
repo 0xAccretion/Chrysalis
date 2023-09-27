@@ -3,7 +3,7 @@ using Chrysalis.Cbor;
 
 namespace Chrysalis.Cardano.Models;
 
-public class TransactionInputs : ByteConvertibleBase, ICborObject<TransactionInputs>
+public class TransactionInputs : ByteConvertibleCborBase, ICborObject<TransactionInputs>
 {
     private readonly HashSet<TransactionInput> _transactionInputs = [];
 
@@ -19,14 +19,14 @@ public class TransactionInputs : ByteConvertibleBase, ICborObject<TransactionInp
         FromCbor(cborData);
     }
 
-    public TransactionInputs FromCbor(byte[] data)
+    public override TransactionInputs FromCbor(byte[] data)
     {
         var reader = new CborReader(data);
         FromCbor(reader);
         return this;
     }
 
-    public TransactionInputs FromCbor(CborReader reader)
+    public override TransactionInputs FromCbor(CborReader reader)
     {
         reader.ReadStartArray();
 
@@ -43,19 +43,19 @@ public class TransactionInputs : ByteConvertibleBase, ICborObject<TransactionInp
         return this;
     }
 
-    public byte[] ToCbor()
+    public override byte[] ToCbor()
     {
         var writer = new CborWriter(CborConformanceMode.Strict);
         return ToCbor(writer).Encode();
     }
 
-    public CborWriter ToCbor(CborWriter writer)
+    public override CborWriter ToCbor(CborWriter writer)
     {
         writer.WriteStartArray(_transactionInputs.Count);
 
         foreach (var input in _transactionInputs)
         {
-            writer.WriteByteString(input.ToByteArray());
+            input.ToCbor(writer);
         }
 
         writer.WriteEndArray();

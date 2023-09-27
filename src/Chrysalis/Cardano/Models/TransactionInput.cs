@@ -12,7 +12,7 @@ namespace Chrysalis.Cardano.Models;
 ///                     , index : uint
 ///                     ]
 /// </remarks>
-public class TransactionInput : ByteConvertibleBase, ICborObject<TransactionInput>
+public class TransactionInput : ByteConvertibleCborBase, ICborObject<TransactionInput>
 {
     /// <summary>
     /// Gets or sets the transaction ID.
@@ -64,7 +64,7 @@ public class TransactionInput : ByteConvertibleBase, ICborObject<TransactionInpu
     /// Reads the CBOR byte array and initializes the <see cref="TransactionInput"/> instance.
     /// </summary>
     /// <param name="data">The CBOR byte array.</param>
-    public TransactionInput FromCbor(byte[] data)
+    public override TransactionInput FromCbor(byte[] data)
     {
         var reader = new CborReader(data);
         return FromCbor(reader);
@@ -74,7 +74,7 @@ public class TransactionInput : ByteConvertibleBase, ICborObject<TransactionInpu
     /// Reads the CBOR data and initializes the <see cref="TransactionInput"/> instance.
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
-    public TransactionInput FromCbor(CborReader reader)
+    public override TransactionInput FromCbor(CborReader reader)
     {
         reader.ReadStartArray();
 
@@ -90,13 +90,13 @@ public class TransactionInput : ByteConvertibleBase, ICborObject<TransactionInpu
     /// Converts the <see cref="TransactionInput"/> instance to a CBOR byte array.
     /// </summary>
     /// <returns>The CBOR byte array.</returns>
-    public byte[] ToCbor()
+    public override byte[] ToCbor()
     {
         var writer = new CborWriter(CborConformanceMode.Strict); 
         return ToCbor(writer).Encode();
     }
 
-    public CborWriter ToCbor(CborWriter writer)
+    public override CborWriter ToCbor(CborWriter writer)
     {
         writer.WriteStartArray(2);
 

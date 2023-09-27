@@ -15,9 +15,19 @@ public class TransactionBody : ByteConvertibleBase, ICborObject<TransactionBody>
 {
     public TransactionInputs Inputs { get; set; } = new();
     public TransactionOutputs Outputs { get; set; } = new();
-    public CoinValue Fee { get; set; }  = new();
+    public CoinValue Fee { get; set; } = new();
 
     public TransactionBody() : base(Array.Empty<byte>()) { }
+
+    public TransactionBody(string hex) : base(Convert.FromHexString(hex))
+    {
+        FromCbor(Convert.FromHexString(hex));
+    }
+
+    public TransactionBody(byte[] cborData) : base(cborData)
+    {
+        FromCbor(cborData);
+    }
 
     public TransactionBody FromCbor(byte[] data)
     {
@@ -72,6 +82,16 @@ public class TransactionBody : ByteConvertibleBase, ICborObject<TransactionBody>
 
         writer.WriteEndMap();
         return writer;
+    }
+    
+    public override byte[] ToByteArray()
+    {
+        return ToCbor(); 
+    }
+
+    public override string ToHexString()
+    {
+        return Convert.ToHexString(ToByteArray()).ToLowerInvariant();
     }
 }
 

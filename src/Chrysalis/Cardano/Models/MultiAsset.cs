@@ -13,7 +13,7 @@ namespace Chrysalis.Cardano.Models;
 /// policy_id = scripthash
 /// asset_name = bytes .size (0..32)
 /// </remarks>
-public class MultiAsset : ByteConvertibleBase, ICborObject<MultiAsset>
+public class MultiAsset : ByteConvertibleCborBase, ICborObject<MultiAsset>
 {
     private readonly Dictionary<ByteString, Dictionary<AssetName, ulong>> _assets = [];
 
@@ -45,7 +45,7 @@ public class MultiAsset : ByteConvertibleBase, ICborObject<MultiAsset>
     /// </summary>
     /// <param name="data">The byte array.</param>
     /// <returns>The deserialized <see cref="MultiAsset"/> object.</returns>
-    public MultiAsset FromCbor(byte[] data)
+    public override MultiAsset FromCbor(byte[] data)
     {
         var reader = new CborReader(data);
         FromCbor(reader);
@@ -57,7 +57,7 @@ public class MultiAsset : ByteConvertibleBase, ICborObject<MultiAsset>
     /// </summary>
     /// <param name="reader">The <see cref="CborReader"/>.</param>
     /// <returns>The deserialized <see cref="MultiAsset"/> object.</returns>
-    public MultiAsset FromCbor(CborReader reader)
+    public override MultiAsset FromCbor(CborReader reader)
     {
         reader.ReadStartMap();
 
@@ -86,13 +86,13 @@ public class MultiAsset : ByteConvertibleBase, ICborObject<MultiAsset>
     /// Serializes the <see cref="MultiAsset"/> object to a byte array.
     /// </summary>
     /// <returns>The serialized byte array.</returns>
-    public byte[] ToCbor()
+    public override byte[] ToCbor()
     {
         var writer = new CborWriter(CborConformanceMode.Strict);
         return ToCbor(writer).Encode();
     }
 
-    public CborWriter ToCbor(CborWriter writer)
+    public override CborWriter ToCbor(CborWriter writer)
     {
         writer.WriteStartMap(_assets.Count);
 

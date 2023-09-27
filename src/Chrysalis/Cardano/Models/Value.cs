@@ -18,7 +18,7 @@ public interface IValue
 /// <summary>
 /// Represents a value in Cardano that consists of a single coin.
 /// </summary>
-public class CoinValue : ByteConvertibleBase, ICborObject<CoinValue>, IValue
+public class CoinValue : ByteConvertibleCborBase, ICborObject<CoinValue>, IValue
 {
     /// <summary>
     /// The amount of the base currency (coin) in the value.
@@ -64,7 +64,7 @@ public class CoinValue : ByteConvertibleBase, ICborObject<CoinValue>, IValue
     /// Deserializes the instance from the specified CBOR data.
     /// </summary>
     /// <param name="data">The CBOR data to deserialize the instance from.</param>
-    public CoinValue FromCbor(byte[] data)
+    public override CoinValue FromCbor(byte[] data)
     {
         var reader = new CborReader(data);
         return FromCbor(reader);
@@ -74,13 +74,13 @@ public class CoinValue : ByteConvertibleBase, ICborObject<CoinValue>, IValue
     /// Serializes the instance to CBOR data.
     /// </summary>
     /// <returns>The serialized CBOR data.</returns>
-    public byte[] ToCbor()
+    public override byte[] ToCbor()
     {
         var writer = new CborWriter(CborConformanceMode.Strict);
         return ToCbor(writer).Encode();
     }
 
-    public CborWriter ToCbor(CborWriter writer)
+    public override CborWriter ToCbor(CborWriter writer)
     {
         writer.WriteUInt64(Coin);
         return writer;
@@ -90,7 +90,7 @@ public class CoinValue : ByteConvertibleBase, ICborObject<CoinValue>, IValue
     /// Deserializes the instance from the specified CBOR reader.
     /// </summary>
     /// <param name="reader">The CBOR reader to deserialize the instance from.</param>
-    public CoinValue FromCbor(CborReader reader)
+    public override CoinValue FromCbor(CborReader reader)
     {
         Coin = reader.ReadUInt64();
         return this;
@@ -118,7 +118,7 @@ public class CoinValue : ByteConvertibleBase, ICborObject<CoinValue>, IValue
 /// <summary>
 /// Represents a value in Cardano that consists of a combination of coins and other assets.
 /// </summary>
-public class MultiAssetValue : ByteConvertibleBase, ICborObject<MultiAssetValue>, IValue
+public class MultiAssetValue : ByteConvertibleCborBase, ICborObject<MultiAssetValue>, IValue
 {
     /// <summary>
     /// The amount of the base currency (coin) in the value.
@@ -169,7 +169,7 @@ public class MultiAssetValue : ByteConvertibleBase, ICborObject<MultiAssetValue>
     /// Deserializes the instance from the specified CBOR data.
     /// </summary>
     /// <param name="data">The CBOR data to deserialize the instance from.</param>
-    public MultiAssetValue FromCbor(byte[] data)
+    public override MultiAssetValue FromCbor(byte[] data)
     {
         var reader = new CborReader(data);
         return FromCbor(reader);
@@ -179,7 +179,7 @@ public class MultiAssetValue : ByteConvertibleBase, ICborObject<MultiAssetValue>
     /// Deserializes the instance from the specified CBOR reader.
     /// </summary>
     /// <param name="reader">The CBOR reader to deserialize the instance from.</param>
-    public MultiAssetValue FromCbor(CborReader reader)
+    public override MultiAssetValue FromCbor(CborReader reader)
     {
         reader.ReadStartArray();
         Coin = reader.ReadUInt64();
@@ -193,13 +193,13 @@ public class MultiAssetValue : ByteConvertibleBase, ICborObject<MultiAssetValue>
     /// Serializes the instance to CBOR data.
     /// </summary>
     /// <returns>The serialized CBOR data.</returns>
-    public byte[] ToCbor()
+    public override byte[] ToCbor()
     {
         var writer = new CborWriter(CborConformanceMode.Strict);
         return ToCbor(writer).Encode();
     }
 
-    public CborWriter ToCbor(CborWriter writer)
+    public override CborWriter ToCbor(CborWriter writer)
     {
         writer.WriteStartArray(2);
         writer.WriteUInt64(Coin);
