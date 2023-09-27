@@ -21,15 +21,17 @@ public class TransactionBodyTests
         // E.g.,
         var expectedFee = new CoinValue(179581UL);
         var expeectedTtl = 104261818UL;
+        var expectedInputsCborHex = "85825820375aaf2a056d060b18b9f4b23233750b7bb7e5bca8655eceda87f2f76e542053008258200312ae1ee8a8756179a9e1844e3e591cb15114aa1f9c9bea181ac838f82e94fe00825820b5e787bd2bbabd34cb4f5d72f092121b7a32992576d45bc5ed8c451b63fafc7a008258209561256f19eeb08af7c29344b1157b112c33663096adaa14e5a4f009d1dd2348008258209561256f19eeb08af7c29344b1157b112c33663096adaa14e5a4f009d1dd234801";
+        var expectedOutputsCborHex = "8282583901e63022b0f461602484968bb10fd8f872787b862ace2d7e943292a37003ec6a12860ef8c07d4c1a8de7df06acb0f0330a6087ecbe972082a7821a001629b6a1581c6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56a45148595045534b554c4c535f56545f505f45015148595045534b554c4c535f56545f565f43015248595045534b554c4c535f56545f4d5f4545015348595045534b554c4c535f56545f41435f45450182583901e63022b0f461602484968bb10fd8f872787b862ace2d7e943292a37003ec6a12860ef8c07d4c1a8de7df06acb0f0330a6087ecbe972082a71a00df2aec";
         // var expectedInputs = ...
         // var expectedOutputs = ...
 
         // Then (Validating deserialization)
         Assert.Equal(expectedFee, deserializedTransactionBody.Fee);
         Assert.Equal(expeectedTtl, deserializedTransactionBody.TTL);
-        // Assert.True(expectedInputs.SequenceEqual(deserializedTransactionBody.Inputs));
-        // Assert.True(expectedOutputs.SequenceEqual(deserializedTransactionBody.Outputs));
 
+        Assert.True(Convert.FromHexString(expectedInputsCborHex).SequenceEqual(deserializedTransactionBody.Inputs.ToByteArray()));
+        Assert.True(Convert.FromHexString(expectedOutputsCborHex).SequenceEqual(deserializedTransactionBody.Outputs.ToByteArray()));
         // When (Serialization)
         byte[] serializedCborData = CborSerializer.Serialize(deserializedTransactionBody);
 
