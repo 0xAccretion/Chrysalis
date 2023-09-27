@@ -102,6 +102,12 @@ public class TransactionOutput  : ByteConvertibleCborBase, ICborObject<Transacti
         return ToCbor(writer).Encode();
     }
 
+    /// <summary>
+    /// Serializes the transaction output to a CBOR-encoded byte array.
+    /// </summary>
+    /// <param name="writer">The CBOR writer to use for serialization.</param>
+    /// <returns>The CBOR writer with the serialized output.</returns>
+    /// <exception cref="CborContentException">Thrown when the amount type is unexpected.</exception>
     public override CborWriter ToCbor(CborWriter writer)
     {
         writer.WriteStartArray(DatumHash == null ? 2 : 3);
