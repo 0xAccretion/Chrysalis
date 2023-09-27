@@ -34,6 +34,12 @@ public class TransactionInput : ByteConvertibleBase, ICborObject<TransactionInpu
         Index = 0;
     }
 
+    public TransactionInput(ByteString transactionId, int index) : base(Array.Empty<byte>())
+    {
+        TransactionId = transactionId;
+        Index = index;
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="TransactionInput"/> class from a hexadecimal string.
     /// </summary>
@@ -86,7 +92,12 @@ public class TransactionInput : ByteConvertibleBase, ICborObject<TransactionInpu
     /// <returns>The CBOR byte array.</returns>
     public byte[] ToCbor()
     {
-        var writer = new CborWriter(CborConformanceMode.Strict);
+        var writer = new CborWriter(CborConformanceMode.Strict); 
+        return ToCbor(writer).Encode();
+    }
+
+    public CborWriter ToCbor(CborWriter writer)
+    {
         writer.WriteStartArray(2);
 
         // Write transaction ID as a byte string
@@ -96,7 +107,7 @@ public class TransactionInput : ByteConvertibleBase, ICborObject<TransactionInpu
         writer.WriteInt32(Index);
 
         writer.WriteEndArray();
-        return writer.Encode();
+        return writer;
     }
 
     /// <summary>

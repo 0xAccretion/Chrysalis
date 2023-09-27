@@ -99,6 +99,11 @@ public class TransactionOutput : ByteConvertibleBase, ICborObject<TransactionOut
     public byte[] ToCbor()
     {
         var writer = new CborWriter(CborConformanceMode.Strict);
+        return ToCbor(writer).Encode();
+    }
+
+    public CborWriter ToCbor(CborWriter writer)
+    {
         writer.WriteStartArray(DatumHash == null ? 2 : 3);
         writer.WriteByteString(Address.ToByteArray());
 
@@ -121,7 +126,7 @@ public class TransactionOutput : ByteConvertibleBase, ICborObject<TransactionOut
         }
 
         writer.WriteEndArray();
-        return writer.Encode();
+        return writer;
     }
 
     /// <inheritdoc/>

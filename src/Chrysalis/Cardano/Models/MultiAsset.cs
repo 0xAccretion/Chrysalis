@@ -89,6 +89,11 @@ public class MultiAsset : ByteConvertibleBase, ICborObject<MultiAsset>
     public byte[] ToCbor()
     {
         var writer = new CborWriter(CborConformanceMode.Strict);
+        return ToCbor(writer).Encode();
+    }
+
+    public CborWriter ToCbor(CborWriter writer)
+    {
         writer.WriteStartMap(_assets.Count);
 
         foreach (var policyEntry in _assets)
@@ -106,7 +111,7 @@ public class MultiAsset : ByteConvertibleBase, ICborObject<MultiAsset>
         }
 
         writer.WriteEndMap();
-        return writer.Encode();
+        return writer;
     }
 
     /// <summary>

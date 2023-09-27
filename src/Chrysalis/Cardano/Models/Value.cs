@@ -77,8 +77,13 @@ public class CoinValue : ByteConvertibleBase, ICborObject<CoinValue>, IValue
     public byte[] ToCbor()
     {
         var writer = new CborWriter(CborConformanceMode.Strict);
+        return ToCbor(writer).Encode();
+    }
+
+    public CborWriter ToCbor(CborWriter writer)
+    {
         writer.WriteUInt64(Coin);
-        return writer.Encode();
+        return writer;
     }
 
     /// <summary>
@@ -191,11 +196,16 @@ public class MultiAssetValue : ByteConvertibleBase, ICborObject<MultiAssetValue>
     public byte[] ToCbor()
     {
         var writer = new CborWriter(CborConformanceMode.Strict);
+        return ToCbor(writer).Encode();
+    }
+
+    public CborWriter ToCbor(CborWriter writer)
+    {
         writer.WriteStartArray(2);
         writer.WriteUInt64(Coin);
         writer.WriteEncodedValue(Assets.ToCbor());
         writer.WriteEndArray();
-        return writer.Encode();
+        return writer;
     }
 
     /// <summary>
