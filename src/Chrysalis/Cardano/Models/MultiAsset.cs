@@ -14,7 +14,7 @@ namespace Chrysalis.Cardano.Models;
 /// policy_id = scripthash
 /// asset_name = bytes .size (0..32)
 /// </remarks>
-public class MultiAsset : ByteConvertibleBase, ICborObject
+public class MultiAsset : ByteConvertibleBase, ICborObject<MultiAsset>
 {
     private readonly Dictionary<ByteString, Dictionary<AssetName, ulong>> _assets = [];
 
@@ -30,13 +30,14 @@ public class MultiAsset : ByteConvertibleBase, ICborObject
         FromCbor(cborData);
     }
 
-    public void FromCbor(byte[] data)
+    public MultiAsset FromCbor(byte[] data)
     {
         var reader = new CborReader(data);
         FromCbor(reader);
+        return this;
     }
 
-    public void FromCbor(CborReader reader)
+    public MultiAsset FromCbor(CborReader reader)
     {
         reader.ReadStartMap();
 
@@ -58,6 +59,7 @@ public class MultiAsset : ByteConvertibleBase, ICborObject
         }
 
         reader.ReadEndMap();
+        return this;
     }
 
     public byte[] ToCbor()

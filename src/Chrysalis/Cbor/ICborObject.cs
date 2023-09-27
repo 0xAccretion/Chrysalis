@@ -2,9 +2,9 @@
 
 namespace Chrysalis.Cbor;
 
-public interface ICborObject
+public interface  ICborObject<T> where T : ICborObject<T>
 {
     byte[] ToCbor();
-    void FromCbor(byte[] data);
-    void FromCbor(CborReader reader);
+    T FromCbor(byte[] data);
+    T FromCbor(CborReader reader);
 }

@@ -18,7 +18,7 @@ public interface IValue
 /// <summary>
 /// Represents a value in Cardano that consists of a single coin.
 /// </summary>
-public class CoinValue : ByteConvertibleBase, ICborObject, IValue
+public class CoinValue : ByteConvertibleBase, ICborObject<CoinValue>, IValue
 {
     /// <summary>
     /// The amount of the base currency (coin) in the value.
@@ -64,10 +64,10 @@ public class CoinValue : ByteConvertibleBase, ICborObject, IValue
     /// Deserializes the instance from the specified CBOR data.
     /// </summary>
     /// <param name="data">The CBOR data to deserialize the instance from.</param>
-    public void FromCbor(byte[] data)
+    public CoinValue FromCbor(byte[] data)
     {
         var reader = new CborReader(data);
-        FromCbor(reader);
+        return FromCbor(reader);
     }
 
     /// <summary>
@@ -85,9 +85,10 @@ public class CoinValue : ByteConvertibleBase, ICborObject, IValue
     /// Deserializes the instance from the specified CBOR reader.
     /// </summary>
     /// <param name="reader">The CBOR reader to deserialize the instance from.</param>
-    public void FromCbor(CborReader reader)
+    public CoinValue FromCbor(CborReader reader)
     {
         Coin = reader.ReadUInt64();
+        return this;
     }
     
     /// <summary>
@@ -112,7 +113,7 @@ public class CoinValue : ByteConvertibleBase, ICborObject, IValue
 /// <summary>
 /// Represents a value in Cardano that consists of a combination of coins and other assets.
 /// </summary>
-public class MultiAssetValue : ByteConvertibleBase, ICborObject, IValue
+public class MultiAssetValue : ByteConvertibleBase, ICborObject<MultiAssetValue>, IValue
 {
     /// <summary>
     /// The amount of the base currency (coin) in the value.
@@ -163,23 +164,24 @@ public class MultiAssetValue : ByteConvertibleBase, ICborObject, IValue
     /// Deserializes the instance from the specified CBOR data.
     /// </summary>
     /// <param name="data">The CBOR data to deserialize the instance from.</param>
-    public void FromCbor(byte[] data)
+    public MultiAssetValue FromCbor(byte[] data)
     {
         var reader = new CborReader(data);
-        FromCbor(reader);
+        return FromCbor(reader);
     }
 
     /// <summary>
     /// Deserializes the instance from the specified CBOR reader.
     /// </summary>
     /// <param name="reader">The CBOR reader to deserialize the instance from.</param>
-    public void FromCbor(CborReader reader)
+    public MultiAssetValue FromCbor(CborReader reader)
     {
         reader.ReadStartArray();
         Coin = reader.ReadUInt64();
         Assets = new MultiAsset();
         Assets.FromCbor(reader);
         reader.ReadEndArray();
+        return this;
     }
 
     /// <summary>
