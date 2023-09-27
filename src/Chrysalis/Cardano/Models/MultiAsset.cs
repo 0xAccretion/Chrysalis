@@ -16,7 +16,7 @@ namespace Chrysalis.Cardano.Models;
 /// </remarks>
 public class MultiAsset : ByteConvertibleBase, ICborObject
 {
-    private readonly Dictionary<ByteString, Dictionary<ByteString, ulong>> _assets = [];
+    private readonly Dictionary<ByteString, Dictionary<AssetName, ulong>> _assets = [];
 
     public MultiAsset() : base(Array.Empty<byte>()) { }
 
@@ -43,12 +43,12 @@ public class MultiAsset : ByteConvertibleBase, ICborObject
         while (reader.PeekState() != CborReaderState.EndMap)
         {
             var policyId = ByteConvertibleFactory.FromBytes<ByteString>(reader.ReadByteString())!;
-            var assetMap = new Dictionary<ByteString, ulong>();
+            var assetMap = new Dictionary<AssetName, ulong>();
 
             reader.ReadStartMap();
             while (reader.PeekState() != CborReaderState.EndMap)
             {
-                var assetName = ByteConvertibleFactory.FromBytes<ByteString>(reader.ReadByteString())!;
+                var assetName = ByteConvertibleFactory.FromBytes<AssetName>(reader.ReadByteString())!;
                 var value = reader.ReadUInt64();
                 assetMap[assetName] = value;
             }
