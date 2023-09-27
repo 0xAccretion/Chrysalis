@@ -1,21 +1,19 @@
 ﻿using System.Formats.Cbor;
-using Chrysalis.Cardano.Models;
 using Chrysalis.Cbor;
 
-namespace Chrysalis;
+namespace Chrysalis.Cardano.Models;
 
-/**
- * <summary>
- * Represents a multi-asset object in the Cardano blockchain.
- * </summary>
- * <remarks>
- * A multi-asset object is a collection of assets that can be stored on the Cardano blockchain. It is represented as a dictionary of policy IDs, where each policy ID maps to a dictionary of asset names and their corresponding values.
- * 
- * CDDL: multiasset<a> = { * policy_id => { * asset_name => a } }
- * policy_id = scripthash
- * asset_name = bytes .size (0..32)
- * </remarks>
- */
+
+/// <summary>
+/// Represents a multi-asset object in the Cardano blockchain.
+/// </summary>
+/// <remarks>
+/// A multi-asset object is a collection of assets that can be stored on the Cardano blockchain. It is represented as a dictionary of policy IDs, where each policy ID maps to a dictionary of asset names and their corresponding values.
+/// 
+/// CDDL: multiasset<a> = { * policy_id => { * asset_name => a } }
+/// policy_id = scripthash
+/// asset_name = bytes .size (0..32)
+/// </remarks>
 public class MultiAsset : ByteConvertibleBase, ICborObject
 {
     private readonly Dictionary<ByteString, Dictionary<ByteString, ulong>> _assets = [];
@@ -35,6 +33,11 @@ public class MultiAsset : ByteConvertibleBase, ICborObject
     public void FromCbor(byte[] data)
     {
         var reader = new CborReader(data);
+        FromCbor(reader);
+    }
+
+    public void FromCbor(CborReader reader)
+    {
         reader.ReadStartMap();
 
         while (reader.PeekState() != CborReaderState.EndMap)

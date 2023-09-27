@@ -41,6 +41,11 @@ public class TransactionInput : ByteConvertibleBase, ICborObject
     public void FromCbor(byte[] data)
     {
         var reader = new CborReader(data);
+        FromCbor(reader);
+    }
+
+    public void FromCbor(CborReader reader)
+    {
         reader.ReadStartArray();
 
         // Create a new TransactionId object from the byte array
