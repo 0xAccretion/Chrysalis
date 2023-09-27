@@ -20,11 +20,13 @@ public class TransactionBodyTests
         // ... Initialize your expected values for Inputs, Outputs, and Fee
         // E.g.,
         var expectedFee = new CoinValue(179581UL);
+        var expeectedTtl = 104261818UL;
         // var expectedInputs = ...
         // var expectedOutputs = ...
 
         // Then (Validating deserialization)
         Assert.Equal(expectedFee, deserializedTransactionBody.Fee);
+        Assert.Equal(expeectedTtl, deserializedTransactionBody.TTL);
         // Assert.True(expectedInputs.SequenceEqual(deserializedTransactionBody.Inputs));
         // Assert.True(expectedOutputs.SequenceEqual(deserializedTransactionBody.Outputs));
 

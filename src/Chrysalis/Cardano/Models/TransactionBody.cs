@@ -5,17 +5,30 @@ namespace Chrysalis.Cardano.Models;
 
 /// <remarks>
 /// CDDL definition:
+/// FILEPATH: /Users/rawriclark/Projects/Chrysalis/src/Chrysalis/Cardano/Models/TransactionBody.cs
 /// transaction_body =
-/// { 0 : set<transaction_input>    ; inputs
-/// , 1 : [* transaction_output]
-/// , 2 : coin                      ; fee
-/// }
+///  { 0 : set<transaction_input>    ; inputs
+///  , 1 : [* transaction_output]
+///  , 2 : coin                      ; fee
+///  , ? 3 : uint                    ; time to live
+///  , ? 4 : [* certificate]
+///  , ? 5 : withdrawals
+///  , ? 6 : update
+///  , ? 7 : auxiliary_data_hash
+///  , ? 8 : uint                    ; validity interval start
+///  , ? 9 : mint
+///  , ? 11 : script_data_hash       ; New
+///  , ? 13 : set<transaction_input> ; Collateral ; new
+///  , ? 14 : required_signers       ; New
+///  , ? 15 : network_id             ; New
+///  }
 /// </remarks>
 public class TransactionBody : ByteConvertibleBase, ICborObject<TransactionBody>
 {
     public TransactionInputs Inputs { get; set; } = new();
     public TransactionOutputs Outputs { get; set; } = new();
     public CoinValue Fee { get; set; } = new();
+    public ulong? TTL { get; set; }
 
     public TransactionBody() : base(Array.Empty<byte>()) { }
 
@@ -52,6 +65,9 @@ public class TransactionBody : ByteConvertibleBase, ICborObject<TransactionBody>
                 case 2:
                     Fee = new CoinValue().FromCbor(reader);
                     break;
+                case 3:
+                    TTL = reader.ReadUInt64();
+                    break;
                 default:
                     reader.SkipValue();
                     break;
@@ -69,7 +85,13 @@ public class TransactionBody : ByteConvertibleBase, ICborObject<TransactionBody>
 
     public CborWriter ToCbor(CborWriter writer)
     {
-        writer.WriteStartMap(3);
+        int mapLength = 3;
+        if (TTL.HasValue)
+        {
+            mapLength++;
+        }
+
+        writer.WriteStartMap(mapLength);
 
         writer.WriteInt32(0);
         Inputs.ToCbor(writer);
@@ -80,13 +102,20 @@ public class TransactionBody : ByteConvertibleBase, ICborObject<TransactionBody>
         writer.WriteInt32(2);
         writer.WriteUInt64(Fee.Coin);
 
+        if (TTL.HasValue)
+        {
+            writer.WriteInt32(3);
+            writer.WriteUInt64(TTL.Value);
+        }
+
         writer.WriteEndMap();
         return writer;
     }
-    
+
+
     public override byte[] ToByteArray()
     {
-        return ToCbor(); 
+        return ToCbor();
     }
 
     public override string ToHexString()
