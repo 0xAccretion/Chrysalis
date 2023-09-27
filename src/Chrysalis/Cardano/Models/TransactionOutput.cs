@@ -16,30 +16,62 @@ namespace Chrysalis.Cardano.Models;
 /// </remarks>
 public class TransactionOutput : ByteConvertibleBase, ICborObject<TransactionOutput>
 {
+    /// <summary>
+    /// Gets or sets the address of the transaction output.
+    /// </summary>
     public ByteString Address { get; set; } = new ByteString();
+
+    /// <summary>
+    /// Gets or sets the amount of the transaction output.
+    /// </summary>
     public IValue Amount { get; set; } = new CoinValue();
+
+    /// <summary>
+    /// Gets or sets the datum hash of the transaction output.
+    /// </summary>
     public ByteString? DatumHash { get; set; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TransactionOutput"/> class.
+    /// </summary>
     public TransactionOutput() : base(Array.Empty<byte>())
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TransactionOutput"/> class from a hexadecimal string.
+    /// </summary>
+    /// <param name="hex">The hexadecimal string.</param>
     public TransactionOutput(string hex) : base(Array.Empty<byte>())
     {
         FromCbor(Convert.FromHexString(hex));
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TransactionOutput"/> class from a byte array.
+    /// </summary>
+    /// <param name="cborData">The byte array.</param>
     public TransactionOutput(byte[] cborData) : base(Array.Empty<byte>())
     {
         FromCbor(cborData);
     }
 
+    /// <summary>
+    /// Deserializes the transaction output from a byte array.
+    /// </summary>
+    /// <param name="data">The byte array.</param>
+    /// <returns>The deserialized transaction output.</returns>
     public TransactionOutput FromCbor(byte[] data)
     {
         var reader = new CborReader(data);
         return FromCbor(reader);
     }
 
+    /// <summary>
+    /// Deserializes the transaction output from a CBOR reader.
+    /// </summary>
+    /// <param name="reader">The CBOR reader.</param>
+    /// <returns>The deserialized transaction output.</returns>
     public TransactionOutput FromCbor(CborReader reader)
     {
         reader.ReadStartArray();
@@ -60,6 +92,10 @@ public class TransactionOutput : ByteConvertibleBase, ICborObject<TransactionOut
         return this;
     }
 
+    /// <summary>
+    /// Serializes the transaction output to a byte array.
+    /// </summary>
+    /// <returns>The serialized transaction output.</returns>
     public byte[] ToCbor()
     {
         var writer = new CborWriter(CborConformanceMode.Strict);
@@ -88,11 +124,13 @@ public class TransactionOutput : ByteConvertibleBase, ICborObject<TransactionOut
         return writer.Encode();
     }
 
+    /// <inheritdoc/>
     public override byte[] ToByteArray()
     {
         return ToCbor();
     }
 
+    /// <inheritdoc/>
     public override string ToHexString()
     {
         return Convert.ToHexString(ToCbor()).ToLowerInvariant();
