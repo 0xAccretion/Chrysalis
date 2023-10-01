@@ -1,57 +1,53 @@
 using Chrysalis.Cardano.Models;
 using Chrysalis.Cbor;
-namespace Chrysalis.Test;
 
-public class TransactionInputTests
+namespace Chrysalis.Test
 {
-    [Fact]
-    public void TestTransactionInputFromToCbor()
+    public class TransactionInputTests
     {
-        // Given
-        byte[] originalCborData = Convert.FromHexString("825820E33B1A20C078149FDE522803EF0B6A50B672E60765AAF6FDE5D15896CA3F862600");
+        private const string OriginalHex = "825820E33B1A20C078149FDE522803EF0B6A50B672E60765AAF6FDE5D15896CA3F862600";
+        private static readonly byte[] OriginalCborData = Convert.FromHexString(OriginalHex);
 
-        // When (Deserialization)
-        var transactionInput = CborSerializer.Deserialize<TransactionInput>(originalCborData);
+        [Fact]
+        public void TestTransactionInputFromToCbor()
+        {
+            // When (Deserialization)
+            var transactionInput = CborSerializerV2.Deserialize<TransactionInput>(OriginalCborData);
 
-        // Prepare expected TransactionId
-        var expectedTransactionId = new ByteString("e33b1a20c078149fde522803ef0b6a50b672e60765aaf6fde5d15896ca3f8626");
+            // Prepare expected TransactionId
+            var expectedTransactionId = "e33b1a20c078149fde522803ef0b6a50b672e60765aaf6fde5d15896ca3f8626";
 
-        // Then
-        Assert.Equal(expectedTransactionId, transactionInput.TransactionId);
-        Assert.Equal(0, transactionInput.Index);
+            // Then
+            Assert.Equal(expectedTransactionId, transactionInput!.TransactionId);
+            Assert.Equal(0u, transactionInput.Index);
 
-        // When (Serialization)
-        byte[] serializedCborData = CborSerializer.Serialize(transactionInput);
+            // When (Serialization)
+            byte[] serializedCborData = CborSerializerV2.Serialize(transactionInput);
 
-        // Then
-        Assert.Equal(originalCborData, serializedCborData);
-    }
+            // Then
+            Assert.True(OriginalCborData.SequenceEqual(serializedCborData));
+        }
 
-    [Fact]
-    public void TestTransactionInputFromToHex()
-    {
-        // Given
-        string originalHex = "825820E33B1A20C078149FDE522803EF0B6A50B672E60765AAF6FDE5D15896CA3F862600";
-        TransactionInput? originalTransactionInput = ByteConvertibleFactory.FromHex<TransactionInput>(originalHex);
+        [Fact]
+        public void TestTransactionInputFromToHex()
+        {
+            // When
+            TransactionInput originalTransactionInput = CborSerializerV2.FromHex<TransactionInput>(OriginalHex)!;
+            string convertedHex = CborSerializerV2.ToHex(originalTransactionInput);
 
-        // When
-        string convertedHex = originalTransactionInput?.ToHexString()!;
+            // Then
+            Assert.Equal(OriginalHex.ToLowerInvariant(), convertedHex);
+        }
 
-        // Then
-        Assert.Equal(originalHex.ToLowerInvariant(), convertedHex);
-    }
+        [Fact]
+        public void TestTransactionInputFromToBytes()
+        {
+            // When
+            TransactionInput originalTransactionInput = CborSerializerV2.Deserialize<TransactionInput>(OriginalCborData)!;
+            byte[] convertedBytes = CborSerializerV2.Serialize(originalTransactionInput);
 
-    [Fact]
-    public void TestTransactionInputFromToBytes()
-    {
-        // Given
-        byte[] originalBytes = Convert.FromHexString("825820E33B1A20C078149FDE522803EF0B6A50B672E60765AAF6FDE5D15896CA3F862600");
-        TransactionInput? originalTransactionInput = ByteConvertibleFactory.FromBytes<TransactionInput>(originalBytes);
-
-        // When
-        byte[]? convertedBytes = originalTransactionInput?.ToByteArray()!;
-
-        // Then
-        Assert.True(originalBytes.SequenceEqual(convertedBytes));
+            // Then
+            Assert.True(OriginalCborData.SequenceEqual(convertedBytes));
+        }
     }
 }

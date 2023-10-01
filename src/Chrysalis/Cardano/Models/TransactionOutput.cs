@@ -14,136 +14,16 @@ namespace Chrysalis.Cardano.Models;
 ///   , ? datum_hash : hash32 ; New
 ///   ]
 /// </remarks>
-public class TransactionOutput  : ByteConvertibleCborBase, ICborObject<TransactionOutput>
+[CborType(CborRepresentation.Tuple)] // Assume that CborRepresentation is an enum specifying array or map representation
+public class TransactionOutput
 {
-    /// <summary>
-    /// Gets or sets the address of the transaction output.
-    /// </summary>
-    public ByteString Address { get; set; } = new ByteString();
+    [CborProperty(CborRepresentation.Int32, 0, CborRepresentation.ByteString)]
+    public string Address { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets the amount of the transaction output.
-    /// </summary>
+    [CborProperty(CborRepresentation.Int32, 1, CborRepresentation.Tuple)] 
+    [CborProperty(CborRepresentation.Int32, 1, CborRepresentation.Int64, true)] 
     public IValue Amount { get; set; } = new CoinValue();
 
-    /// <summary>
-    /// Gets or sets the datum hash of the transaction output.
-    /// </summary>
-    public ByteString? DatumHash { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TransactionOutput"/> class.
-    /// </summary>
-    public TransactionOutput() : base(Array.Empty<byte>())
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TransactionOutput"/> class from a hexadecimal string.
-    /// </summary>
-    /// <param name="hex">The hexadecimal string.</param>
-    public TransactionOutput(string hex) : base(Array.Empty<byte>())
-    {
-        FromCbor(Convert.FromHexString(hex));
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TransactionOutput"/> class from a byte array.
-    /// </summary>
-    /// <param name="cborData">The byte array.</param>
-    public TransactionOutput(byte[] cborData) : base(Array.Empty<byte>())
-    {
-        FromCbor(cborData);
-    }
-
-    /// <summary>
-    /// Deserializes the transaction output from a byte array.
-    /// </summary>
-    /// <param name="data">The byte array.</param>
-    /// <returns>The deserialized transaction output.</returns>
-    public override TransactionOutput FromCbor(byte[] data)
-    {
-        var reader = new CborReader(data);
-        return FromCbor(reader);
-    }
-
-    /// <summary>
-    /// Deserializes the transaction output from a CBOR reader.
-    /// </summary>
-    /// <param name="reader">The CBOR reader.</param>
-    /// <returns>The deserialized transaction output.</returns>
-    public override TransactionOutput FromCbor(CborReader reader)
-    {
-        reader.ReadStartArray();
-        Address = new ByteString(reader.ReadByteString());
-
-        Amount = reader.PeekState() switch
-        {
-            CborReaderState.UnsignedInteger => new CoinValue(reader.ReadUInt64()),
-            CborReaderState.StartArray => new MultiAssetValue().FromCbor(reader),
-            _ => throw new CborContentException($"Unexpected CBOR reader state: {reader.PeekState()}")
-        };
-
-        if (reader.PeekState() != CborReaderState.EndArray)
-        {
-            DatumHash = new ByteString(reader.ReadByteString());
-        }
-        reader.ReadEndArray();
-        return this;
-    }
-
-    /// <summary>
-    /// Serializes the transaction output to a byte array.
-    /// </summary>
-    /// <returns>The serialized transaction output.</returns>
-    public override byte[] ToCbor()
-    {
-        var writer = new CborWriter(CborConformanceMode.Strict);
-        return ToCbor(writer).Encode();
-    }
-
-    /// <summary>
-    /// Serializes the transaction output to a CBOR-encoded byte array.
-    /// </summary>
-    /// <param name="writer">The CBOR writer to use for serialization.</param>
-    /// <returns>The CBOR writer with the serialized output.</returns>
-    /// <exception cref="CborContentException">Thrown when the amount type is unexpected.</exception>
-    public override CborWriter ToCbor(CborWriter writer)
-    {
-        writer.WriteStartArray(DatumHash == null ? 2 : 3);
-        writer.WriteByteString(Address.ToByteArray());
-
-        if (Amount is MultiAssetValue multiAssetValue)
-        {
-            writer.WriteEncodedValue(multiAssetValue.ToCbor());
-        }
-        else if (Amount is CoinValue coinValue)
-        {
-            writer.WriteEncodedValue(coinValue.ToCbor());
-        }
-        else
-        {
-            throw new CborContentException($"Unexpected amount type: {Amount.GetType()}");
-        }
-
-        if (DatumHash != null)
-        {
-            writer.WriteByteString(DatumHash.ToByteArray());
-        }
-
-        writer.WriteEndArray();
-        return writer;
-    }
-
-    /// <inheritdoc/>
-    public override byte[] ToByteArray()
-    {
-        return ToCbor();
-    }
-
-    /// <inheritdoc/>
-    public override string ToHexString()
-    {
-        return Convert.ToHexString(ToCbor()).ToLowerInvariant();
-    }
+    [CborProperty(CborRepresentation.Int32, 2, CborRepresentation.ByteString)]
+    public string? DatumHash { get; set; }
 }

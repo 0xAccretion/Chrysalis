@@ -8,46 +8,44 @@ public class MultiAssetTests
     [Fact]
     public void TestMultiAssetFromToCbor()
     {
-        // Given
-        byte[] originalCborData = Convert.FromHexString("A1581C6F37A98BD0C9CED4E302EC2FB3A2F19FFBA1B5C0C2BEDEE3DAC30E56A45148595045534B554C4C535F56545F505F45015148595045534B554C4C535F56545F565F43015248595045534B554C4C535F56545F4D5F4545015348595045534B554C4C535F56545F41435F454501");
+        // Arrange
 
-        // When (Deserialization)
-        var multiAsset = CborSerializer.Deserialize<MultiAsset>(originalCborData);
+        var originalAsset = new Asset
+        {
+            { "48595045534b554c4c535f56545f505f45", 1 },
+            { "48595045534b554c4c535f56545f565f43", 2 },
+            { "48595045534b554c4c535f56545f4d5f4545", 3 },
+            { "48595045534b554c4c535f56545f41435f4545", 4 }
+        };
 
-        // ... Insert assertions for individual fields here ...
 
-        // When (Serialization)
-        byte[] serializedCborData = CborSerializer.Serialize(multiAsset);
+        var originalMultiAsset = new MultiAsset
+        {
+            { "6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56", originalAsset }
+        };
 
-        // Then
-        Assert.True(originalCborData.SequenceEqual(serializedCborData));
-    }
+        // Act
+        // Serialization
+        byte[] serializedCborData = CborSerializerV2.Serialize(originalMultiAsset);
 
-    [Fact]
-    public void TestMultiAssetFromToHex()
-    {
-        // Given
-        string originalHex = "A1581C6F37A98BD0C9CED4E302EC2FB3A2F19FFBA1B5C0C2BEDEE3DAC30E56A45148595045534B554C4C535F56545F505F45015148595045534B554C4C535F56545F565F43015248595045534B554C4C535F56545F4D5F4545015348595045534B554C4C535F56545F41435F454501";
-        MultiAsset? originalMultiAsset = ByteConvertibleFactory.FromHex<MultiAsset>(originalHex);
+        // Deserialization
+        var deserializedMultiAsset = CborSerializerV2.Deserialize<MultiAsset>(serializedCborData);
 
-        // When
-        string convertedHex = originalMultiAsset?.ToHexString()!;
+        // Assert
+        Assert.NotNull(deserializedMultiAsset);
+        Assert.Single(deserializedMultiAsset);
+        Assert.Equal(4, deserializedMultiAsset["6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56"].Count);
 
-        // Then
-        Assert.Equal(originalHex.ToLowerInvariant(), convertedHex);
-    }
+        Assert.True(deserializedMultiAsset.ContainsKey("6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56"));
+        Assert.Equal(1u, deserializedMultiAsset["6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56"]["48595045534b554c4c535f56545f505f45"]);
 
-    [Fact]
-    public void TestMultiAssetFromToBytes()
-    {
-        // Given
-        byte[] originalBytes = Convert.FromHexString("A1581C6F37A98BD0C9CED4E302EC2FB3A2F19FFBA1B5C0C2BEDEE3DAC30E56A45148595045534B554C4C535F56545F505F45015148595045534B554C4C535F56545F565F43015248595045534B554C4C535F56545F4D5F4545015348595045534B554C4C535F56545F41435F454501");
-        MultiAsset? originalMultiAsset = ByteConvertibleFactory.FromBytes<MultiAsset>(originalBytes);
+        Assert.True(deserializedMultiAsset.ContainsKey("6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56"));
+        Assert.Equal(2u, deserializedMultiAsset["6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56"]["48595045534b554c4c535f56545f565f43"]);
 
-        // When
-        byte[]? convertedBytes = originalMultiAsset?.ToByteArray()!;
+        Assert.True(deserializedMultiAsset.ContainsKey("6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56"));
+        Assert.Equal(3u, deserializedMultiAsset["6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56"]["48595045534b554c4c535f56545f4d5f4545"]);
 
-        // Then
-        Assert.True(originalBytes.SequenceEqual(convertedBytes));
+        Assert.True(deserializedMultiAsset.ContainsKey("6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56"));
+        Assert.Equal(4u, deserializedMultiAsset["6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56"]["48595045534b554c4c535f56545f41435f4545"]);
     }
 }

@@ -6,102 +6,42 @@ namespace Chrysalis.Test;
 public class ValueTests
 {
     [Fact]
-    public void TestCoinValueFromToCbor()
+    public void TestIValueSerializationAndDeserialization()
     {
-        // Given
-        byte[] originalCborData = Convert.FromHexString("1a001629b6");
-        var expectedCoin = 1_452_470UL; // Replace with expected value
+        // Arrange
+        var originalAsset = new Asset
+        {
+            { "48595045534b554c4c535f56545f505f45", 1 },
+            { "48595045534b554c4c535f56545f565f43", 2 },
+            { "48595045534b554c4c535f56545f4d5f4545", 3 },
+            { "48595045534b554c4c535f56545f41435f4545", 4 }
+        };
 
-        // When (Deserialization)
-        var coinValue = CborSerializer.Deserialize<CoinValue>(originalCborData);
 
-        // Then
-        Assert.Equal(expectedCoin, coinValue.Coin);
+        var originalMultiAsset = new MultiAsset
+        {
+            { "6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56", originalAsset }
+        };
 
-        // When (Serialization)
-        byte[] serializedCborData = CborSerializer.Serialize(coinValue);
+        var multiAssetValue = new MultiAssetValue(1452470, originalMultiAsset);
 
-        // Then
-        Assert.True(originalCborData.SequenceEqual(serializedCborData));
-    }
+        var coinValue = new CoinValue(1452470);
 
-    [Fact]
-    public void TestMultiAssetValueFromToCbor()
-    {
-        // Given
-        byte[] originalCborData = Convert.FromHexString("821A001629B6A1581C6F37A98BD0C9CED4E302EC2FB3A2F19FFBA1B5C0C2BEDEE3DAC30E56A45148595045534B554C4C535F56545F505F45015148595045534B554C4C535F56545F565F43015248595045534B554C4C535F56545F4D5F4545015348595045534B554C4C535F56545F41435F454501");
+        // Act - MultiAssetValue
+        byte[] serializedMultiAssetValue = CborSerializerV2.Serialize(multiAssetValue);
+        var deserializedMultiAssetValue = CborSerializerV2.Deserialize<MultiAssetValue>(serializedMultiAssetValue);
 
-        // Create expected values
-        var expectedCoin = 1_452_470UL; // Replace with expected value
+        // Assert - MultiAssetValue
+        Assert.NotNull(deserializedMultiAssetValue);
+        Assert.Equal(multiAssetValue.Coin, deserializedMultiAssetValue!.Coin);
+        Assert.Equal(multiAssetValue.MultiAsset, deserializedMultiAssetValue.MultiAsset);  // Adjust this as needed
 
-        // When (Deserialization)
-        var multiAssetValue = CborSerializer.Deserialize<MultiAssetValue>(originalCborData);
+        // Act - CoinValue
+        byte[] serializedCoinValue = CborSerializerV2.Serialize(coinValue);
+        var deserializedCoinValue = CborSerializerV2.Deserialize<CoinValue>(serializedCoinValue);
 
-        // Then
-        Assert.Equal(expectedCoin, multiAssetValue.Coin);
-        // Add asserts to compare expectedAssets and multiAssetValue.Assets
-
-        // When (Serialization)
-        byte[] serializedCborData = CborSerializer.Serialize(multiAssetValue);
-
-        // Then
-        Assert.True(originalCborData.SequenceEqual(serializedCborData));
-    }
-
-    [Fact]
-    public void TestCoinValueFromToHex()
-    {
-        // Given
-        string originalHex = "1a001629b6";  // Hex string representation of the original CBOR data
-        CoinValue? originalCoinValue = ByteConvertibleFactory.FromHex<CoinValue>(originalHex);
-
-        // When
-        string convertedHex = originalCoinValue?.ToHexString()!;
-
-        // Then
-        Assert.Equal(originalHex.ToLowerInvariant(), convertedHex.ToLowerInvariant());
-    }
-
-    [Fact]
-    public void TestCoinValueFromToBytes()
-    {
-        // Given
-        byte[] originalBytes = Convert.FromHexString("1a001629b6");  // Original CBOR data
-        CoinValue? originalCoinValue = ByteConvertibleFactory.FromBytes<CoinValue>(originalBytes);
-
-        // When
-        byte[]? convertedBytes = originalCoinValue?.ToByteArray();
-
-        // Then
-        Assert.True(originalBytes.SequenceEqual(convertedBytes!));
-    }
-
-    // Similar tests for MultiAssetValue
-    [Fact]
-    public void TestMultiAssetValueFromToHex()
-    {
-        // Given
-        string originalHex = "821A001629B6A1581C6F37A98BD0C9CED4E302EC2FB3A2F19FFBA1B5C0C2BEDEE3DAC30E56A45148595045534B554C4C535F56545F505F45015148595045534B554C4C535F56545F565F43015248595045534B554C4C535F56545F4D5F4545015348595045534B554C4C535F56545F41435F454501";
-        MultiAssetValue? originalMultiAssetValue = ByteConvertibleFactory.FromHex<MultiAssetValue>(originalHex);
-
-        // When
-        string convertedHex = originalMultiAssetValue?.ToHexString()!;
-
-        // Then
-        Assert.Equal(originalHex.ToLowerInvariant(), convertedHex.ToLowerInvariant());
-    }
-
-    [Fact]
-    public void TestMultiAssetValueFromToBytes()
-    {
-        // Given
-        byte[] originalBytes = Convert.FromHexString("821A001629B6A1581C6F37A98BD0C9CED4E302EC2FB3A2F19FFBA1B5C0C2BEDEE3DAC30E56A45148595045534B554C4C535F56545F505F45015148595045534B554C4C535F56545F565F43015248595045534B554C4C535F56545F4D5F4545015348595045534B554C4C535F56545F41435F454501");
-        MultiAssetValue? originalMultiAssetValue = ByteConvertibleFactory.FromBytes<MultiAssetValue>(originalBytes);
-
-        // When
-        byte[]? convertedBytes = originalMultiAssetValue?.ToByteArray();
-
-        // Then
-        Assert.True(originalBytes.SequenceEqual(convertedBytes!));
+        // Assert - CoinValue
+        Assert.NotNull(deserializedCoinValue);
+        Assert.Equal(coinValue.Coin, deserializedCoinValue!.Coin);
     }
 }

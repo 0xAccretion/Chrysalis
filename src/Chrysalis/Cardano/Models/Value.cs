@@ -1,228 +1,59 @@
-﻿using System.Formats.Cbor;
-using Chrysalis.Cbor;
+﻿using Chrysalis.Cbor;
 
 namespace Chrysalis.Cardano.Models;
 
-/// <summary>
-/// Represents a value in Cardano, which can be either a single coin or a combination of coins and other assets.
-/// CDDL: value = coin / [coin,multiasset<uint>]
-/// </summary>
 public interface IValue
 {
-    /// <summary>
-    /// The amount of the base currency (coin) in the value.
-    /// </summary>
     ulong Coin { get; set; }
 }
 
-/// <summary>
-/// Represents a value in Cardano that consists of a single coin.
-/// </summary>
-public class CoinValue : ByteConvertibleCborBase, ICborObject<CoinValue>, IValue
+[CborType(CborRepresentation.UInt64, true)]
+public class CoinValue : IValue
 {
-    /// <summary>
-    /// The amount of the base currency (coin) in the value.
-    /// </summary>
-    public ulong Coin { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CoinValue"/> class with a coin value of 0.
-    /// </summary>
-    public CoinValue() : base(Array.Empty<byte>())
+    public CoinValue()
     {
         Coin = 0;
     }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CoinValue"/> class with the specified coin value.
-    /// </summary>
-    /// <param name="coin">The amount of the base currency (coin) in the value.</param>
-    public CoinValue(ulong coin) : base(Array.Empty<byte>())
+    
+    public CoinValue(ulong coin)
     {
         Coin = coin;
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CoinValue"/> class with the specified hex string.
-    /// </summary>
-    /// <param name="hex">The hex string to initialize the instance with.</param>
-    public CoinValue(string hex) : base(Array.Empty<byte>())
+    public ulong Coin
     {
-        FromCbor(Convert.FromHexString(hex));
+        get => Value;
+        set => Value = value;
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CoinValue"/> class with the specified CBOR data.
-    /// </summary>
-    /// <param name="cborData">The CBOR data to initialize the instance with.</param>
-    public CoinValue(byte[] cborData) : base(Array.Empty<byte>())
-    {
-        FromCbor(cborData);
-    }
-
-    /// <summary>
-    /// Deserializes the instance from the specified CBOR data.
-    /// </summary>
-    /// <param name="data">The CBOR data to deserialize the instance from.</param>
-    public override CoinValue FromCbor(byte[] data)
-    {
-        var reader = new CborReader(data);
-        return FromCbor(reader);
-    }
-
-    /// <summary>
-    /// Serializes the instance to CBOR data.
-    /// </summary>
-    /// <returns>The serialized CBOR data.</returns>
-    public override byte[] ToCbor()
-    {
-        var writer = new CborWriter(CborConformanceMode.Strict);
-        return ToCbor(writer).Encode();
-    }
-
-    public override CborWriter ToCbor(CborWriter writer)
-    {
-        writer.WriteUInt64(Coin);
-        return writer;
-    }
-
-    /// <summary>
-    /// Deserializes the instance from the specified CBOR reader.
-    /// </summary>
-    /// <param name="reader">The CBOR reader to deserialize the instance from.</param>
-    public override CoinValue FromCbor(CborReader reader)
-    {
-        Coin = reader.ReadUInt64();
-        return this;
-    }
-    
-    /// <summary>
-    /// Serializes the instance to a byte array.
-    /// </summary>
-    /// <returns>The serialized byte array.</returns>
-    public override byte[] ToByteArray()
-    {
-        return ToCbor();
-    }
-
-    /// <summary>
-    /// Serializes the instance to a hex string.
-    /// </summary>
-    /// <returns>The serialized hex string.</returns>
-    public override string ToHexString()
-    {
-        return Convert.ToHexString(ToCbor()).ToLowerInvariant();
-    }
+    public ulong Value { get; set; }
 }
 
-/// <summary>
-/// Represents a value in Cardano that consists of a combination of coins and other assets.
-/// </summary>
-public class MultiAssetValue : ByteConvertibleCborBase, ICborObject<MultiAssetValue>, IValue
+[CborType(CborRepresentation.Tuple)]
+public class MultiAssetValue : IValue
 {
-    /// <summary>
-    /// The amount of the base currency (coin) in the value.
-    /// </summary>
-    public ulong Coin { get; set; } = 0;
+    [CborProperty(CborRepresentation.Int32, 0, CborRepresentation.UInt64)]
+    public ulong Coin { get; set; }
 
-    /// <summary>
-    /// The assets included in the value.
-    /// </summary>
-    public MultiAsset Assets { get; set; } = new MultiAsset();
+    [CborProperty(CborRepresentation.Int32, 1, CborRepresentation.Map)]
+    public MultiAsset MultiAsset { get; set; }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MultiAssetValue"/> class with a coin value of 0 and no assets.
-    /// </summary>
-    public MultiAssetValue() : base(Array.Empty<byte>())
-    { }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MultiAssetValue"/> class with the specified coin value and assets.
-    /// </summary>
-    /// <param name="coin">The amount of the base currency (coin) in the value.</param>
-    /// <param name="assets">The assets included in the value.</param>
-    public MultiAssetValue(ulong coin, MultiAsset assets) : base(Array.Empty<byte>())
+    public MultiAssetValue()
     {
-        Coin = coin;
-        Assets = assets;
+        Coin = 0;
+        MultiAsset = [];
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MultiAssetValue"/> class with the specified hex string.
-    /// </summary>
-    /// <param name="hex">The hex string to initialize the instance with.</param>
-    public MultiAssetValue(string hex) : base(Array.Empty<byte>())
+    public MultiAssetValue(ulong coin, MultiAsset multiAsset)
     {
-        FromCbor(Convert.FromHexString(hex));
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MultiAssetValue"/> class with the specified CBOR data.
-    /// </summary>
-    /// <param name="cborData">The CBOR data to initialize the instance with.</param>
-    public MultiAssetValue(byte[] cborData) : base(Array.Empty<byte>())
-    {
-        FromCbor(cborData);
-    }
-
-    /// <summary>
-    /// Deserializes the instance from the specified CBOR data.
-    /// </summary>
-    /// <param name="data">The CBOR data to deserialize the instance from.</param>
-    public override MultiAssetValue FromCbor(byte[] data)
-    {
-        var reader = new CborReader(data);
-        return FromCbor(reader);
-    }
-
-    /// <summary>
-    /// Deserializes the instance from the specified CBOR reader.
-    /// </summary>
-    /// <param name="reader">The CBOR reader to deserialize the instance from.</param>
-    public override MultiAssetValue FromCbor(CborReader reader)
-    {
-        reader.ReadStartArray();
-        Coin = reader.ReadUInt64();
-        Assets = new MultiAsset();
-        Assets.FromCbor(reader);
-        reader.ReadEndArray();
-        return this;
-    }
-
-    /// <summary>
-    /// Serializes the instance to CBOR data.
-    /// </summary>
-    /// <returns>The serialized CBOR data.</returns>
-    public override byte[] ToCbor()
-    {
-        var writer = new CborWriter(CborConformanceMode.Strict);
-        return ToCbor(writer).Encode();
-    }
-
-    public override CborWriter ToCbor(CborWriter writer)
-    {
-        writer.WriteStartArray(2);
-        writer.WriteUInt64(Coin);
-        writer.WriteEncodedValue(Assets.ToCbor());
-        writer.WriteEndArray();
-        return writer;
-    }
-
-    /// <summary>
-    /// Serializes the instance to a byte array.
-    /// </summary>
-    /// <returns>The serialized byte array.</returns>
-    public override byte[] ToByteArray()
-    {
-        return ToCbor();
-    }
-
-    /// <summary>
-    /// Serializes the instance to a hex string.
-    /// </summary>
-    /// <returns>The serialized hex string.</returns>
-    public override string ToHexString()
-    {
-        return Convert.ToHexString(ToCbor()).ToLowerInvariant();
+        if (multiAsset != null)
+        {
+            Coin = coin;
+            MultiAsset = multiAsset;
+        }
+        else
+        {
+            throw new ArgumentNullException(nameof(multiAsset));
+        }
     }
 }
