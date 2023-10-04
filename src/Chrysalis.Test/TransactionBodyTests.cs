@@ -35,7 +35,7 @@ public class TransactionBodyTests
         // Assert.True(expectedOutputs.SequenceEqual(deserializedTransactionBody.Outputs));
 
         // When (Serialization)
-        byte[] serializedCborData = CborSerializerV2.Serialize(deserializedTransactionBody);
+        byte[] serializedCborData = CborSerializerV2.Serialize(deserializedTransactionBody!);
 
         // Then (Validating serialization)
         Assert.True(originalCborData.SequenceEqual(serializedCborData));

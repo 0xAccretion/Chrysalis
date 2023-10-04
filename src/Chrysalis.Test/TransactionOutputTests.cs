@@ -19,7 +19,7 @@ public class TransactionOutputTests
         var expectedAmount = CborSerializerV2.FromHex<Value>("821A001629B6A1581C6F37A98BD0C9CED4E302EC2FB3A2F19FFBA1B5C0C2BEDEE3DAC30E56A45148595045534B554C4C535F56545F505F45015148595045534B554C4C535F56545F565F43025248595045534B554C4C535F56545F4D5F4545035348595045534B554C4C535F56545F41435F454504");
         // Then
         Assert.Equal(expectedAddress, transactionOutput!.Address);
-        Assert.Equal(expectedAmount.Coin, transactionOutput.Amount.Coin);
+        Assert.Equal(expectedAmount!.Coin, transactionOutput.Amount.Coin);
 
         // When (Serialization)
         byte[] serializedCborData = CborSerializerV2.Serialize(transactionOutput);

@@ -40,7 +40,7 @@ public static class CborSerializerV2
                     SerializePrimitive(writer, obj, objType, representation);
                     return;
                 }
-                catch(Exception ex)
+                catch
                 {
                     continue;
                 }
@@ -107,7 +107,7 @@ public static class CborSerializerV2
                         SerializePrimitive(writer, obj, objType, cborPropAttr.ValueType);
                         return;
                     }
-                    catch(Exception ex)
+                    catch
                     {
                         continue;
                     }
@@ -290,7 +290,7 @@ public static class CborSerializerV2
                     return DeserializePrimitive(reader, targetType, representationToUse);
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 return null;
             }
