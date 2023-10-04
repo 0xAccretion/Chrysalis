@@ -19,21 +19,6 @@ public class TransactionBodyTests
         // When (Deserialization)
         var deserializedTransactionBody = CborSerializerV2.Deserialize<TransactionBody>(originalCborData);
 
-        // Prepare expected values
-        // Initialize your expected values for Inputs, Outputs, and Fee
-        // var expectedFee = new CoinValue(179581UL); // Replace with your real expected value
-        // var expectedTtl = 104261818UL; // Replace with your real expected value
-        // var expectedInputs = ... // Replace with your real expected value
-        // var expectedOutputs = ... // Replace with your real expected value
-
-        // // Then (Validating deserialization)
-        // Assert.Equal(expectedFee, deserializedTransactionBody.Fee);
-        // Assert.Equal(expectedTtl, deserializedTransactionBody.TTL);
-
-        // Uncomment and update these lines as necessary:
-        // Assert.True(expectedInputs.SequenceEqual(deserializedTransactionBody.Inputs));
-        // Assert.True(expectedOutputs.SequenceEqual(deserializedTransactionBody.Outputs));
-
         // When (Serialization)
         byte[] serializedCborData = CborSerializerV2.Serialize(deserializedTransactionBody!);
 
