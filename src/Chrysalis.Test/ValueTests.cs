@@ -23,13 +23,13 @@ public class ValueTests
             { "6f37a98bd0c9ced4e302ec2fb3a2f19ffba1b5c0c2bedee3dac30e56", originalAsset }
         };
 
-        var multiAssetValue = new MultiAssetValue(1452470, originalMultiAsset);
+        var multiAssetValue = new Value(1452470, originalMultiAsset);
 
-        var coinValue = new CoinValue(1452470);
+        var coinValue = new Value(1452470);
 
         // Act - MultiAssetValue
         byte[] serializedMultiAssetValue = CborSerializerV2.Serialize(multiAssetValue);
-        var deserializedMultiAssetValue = CborSerializerV2.Deserialize<MultiAssetValue>(serializedMultiAssetValue);
+        var deserializedMultiAssetValue = CborSerializerV2.Deserialize<Value>(serializedMultiAssetValue);
 
         // Assert - MultiAssetValue
         Assert.NotNull(deserializedMultiAssetValue);
@@ -38,7 +38,7 @@ public class ValueTests
 
         // Act - CoinValue
         byte[] serializedCoinValue = CborSerializerV2.Serialize(coinValue);
-        var deserializedCoinValue = CborSerializerV2.Deserialize<CoinValue>(serializedCoinValue);
+        var deserializedCoinValue = CborSerializerV2.Deserialize<Value>(serializedCoinValue);
 
         // Assert - CoinValue
         Assert.NotNull(deserializedCoinValue);

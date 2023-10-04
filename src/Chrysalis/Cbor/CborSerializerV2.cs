@@ -1,6 +1,7 @@
 ﻿using System.Formats.Cbor;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.VisualBasic;
 
 namespace Chrysalis.Cbor;
 
@@ -15,37 +16,48 @@ public static class CborSerializerV2
 
     private static void SerializeObject(CborWriter writer, object obj, Type objType)
     {
-        var cborTypeAttr = (CborTypeAttribute?)Attribute.GetCustomAttribute(objType, typeof(CborTypeAttribute));
-        if (cborTypeAttr != null)
-        {
-            if (cborTypeAttr.IsBasicType)
-            {
-                // Use reflection to get the value of the 'Value' property
-                var valueProperty = objType.GetProperty("Value") ?? throw new InvalidOperationException("A basic type must have a 'Value' property.");
-                var value = valueProperty.GetValue(obj);
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value), "Value cannot be null.");
-                }
-                SerializePrimitive(writer, value, value.GetType());
-                return;  // Skip the rest of the serialization steps
-            }
+        var cborTypeAttrs = (IEnumerable<CborTypeAttribute>?)Attribute.GetCustomAttributes(objType, typeof(CborTypeAttribute));
 
-            SerializePrimitive(writer, obj, objType);
+        if (cborTypeAttrs is not null && cborTypeAttrs.Any())
+        {
+            foreach (var cborTypeAttr in cborTypeAttrs)
+            {
+                try
+                {
+                    if (cborTypeAttr.IsBasicType)
+                    {
+                        // Use reflection to get the value of the 'Value' property
+                        var valueProperty = objType.GetProperty("CborValue") ?? throw new InvalidOperationException("A basic type must have a 'Value' property.");
+                        var value = valueProperty.GetValue(obj);
+                        if (value == null)
+                        {
+                            throw new ArgumentNullException(nameof(value), "Value cannot be null.");
+                        }
+                        SerializePrimitive(writer, value, value.GetType());
+                        return;  // Skip the rest of the serialization steps
+                    }
+                    var representation = cborTypeAttr.Representation;
+                    SerializePrimitive(writer, obj, objType, representation);
+                    return;
+                }
+                catch(Exception ex)
+                {
+                    continue;
+                }
+            }
+            throw new NotImplementedException("Unknown CborRepresentation");
         }
-        else // Handling primitive types without attributes
+        else
         {
             SerializePrimitive(writer, obj, objType);
         }
     }
 
-    private static void SerializePrimitive(CborWriter writer, object obj, Type objType)
+    private static void SerializePrimitive(CborWriter writer, object obj, Type objType, CborRepresentation? overrideRepresentation = null)
     {
-        var cborTypeAttr = (CborTypeAttribute?)Attribute.GetCustomAttribute(objType, typeof(CborTypeAttribute));
-
-        if (cborTypeAttr != null)
+        if (overrideRepresentation != null)
         {
-            switch (cborTypeAttr.Representation)
+            switch (overrideRepresentation)
             {
                 case CborRepresentation.Set:
                 case CborRepresentation.Array:
@@ -84,28 +96,64 @@ public static class CborSerializerV2
         }
         else
         {
-            switch (objType)
+            
+            var cborPropAttrs = (IEnumerable<CborPropertyAttribute>?)Attribute.GetCustomAttributes(objType, typeof(CborPropertyAttribute));
+            if (cborPropAttrs is not null && cborPropAttrs.Any())
             {
-                case Type t when t == typeof(int):
-                    writer.WriteInt32((int)obj);
-                    break;
-                case Type t when t == typeof(long):
-                    writer.WriteInt64((long)obj);
-                    break;
-                case Type t when t == typeof(uint):
-                    writer.WriteUInt32((uint)obj);
-                    break;
-                case Type t when t == typeof(ulong):
-                    writer.WriteUInt64((ulong)obj);
-                    break;
-                case Type t when t == typeof(string):
-                    writer.WriteByteString(Convert.FromHexString((string)obj));
-                    break;
-                case Type t when t == typeof(bool):
-                    writer.WriteBoolean((bool)obj);
-                    break;
-                default:
-                    throw new NotImplementedException("Type not supported");
+                foreach (var cborPropAttr in cborPropAttrs)
+                {
+                    try
+                    {
+                        SerializePrimitive(writer, obj, objType, cborPropAttr.ValueType);
+                        return;
+                    }
+                    catch(Exception ex)
+                    {
+                        continue;
+                    }
+                }
+                throw new NotImplementedException("Unknown CborRepresentation");
+            }
+            else
+            {
+                switch (objType)
+                {
+                    case Type t when t == typeof(string):
+                        writer.WriteByteString(Convert.FromHexString((string)obj));
+                        break;
+                    case Type t when t == typeof(int):
+                        writer.WriteInt32((int)obj);
+                        break;
+                    case Type t when t == typeof(long):
+                        writer.WriteInt64((long)obj);
+                        break;
+                    case Type t when t == typeof(uint):
+                        writer.WriteUInt32((uint)obj);
+                        break;
+                    case Type t when t == typeof(ulong):
+                        writer.WriteUInt64((ulong)obj);
+                        break;
+                    case Type t when t == typeof(bool):
+                        writer.WriteBoolean((bool)obj);
+                        break;
+                    case Type t when t == typeof(int?):
+                        writer.WriteInt32((int)obj);
+                        break;
+                    case Type t when t == typeof(long?):
+                        writer.WriteInt64((long)obj);
+                        break;
+                    case Type t when t == typeof(uint?):
+                        writer.WriteUInt32((uint)obj);
+                        break;
+                    case Type t when t == typeof(ulong?):
+                        writer.WriteUInt64((ulong)obj);
+                        break;
+                    case Type t when t == typeof(bool?):
+                        writer.WriteBoolean((bool)obj);
+                        break;
+                    default:
+                        throw new NotImplementedException("Type not supported");
+                }
             }
         }
     }
@@ -169,9 +217,9 @@ public static class CborSerializerV2
     private static void SerializeTuple(CborWriter writer, object obj, Type objType)
     {
         var sortedProperties = objType.GetProperties()
-            .Select(prop => (prop, cborPropAttr: (CborPropertyAttribute?)Attribute.GetCustomAttribute(prop, typeof(CborPropertyAttribute))))
-            .Where(x => x.cborPropAttr != null && x.prop.GetValue(obj) != null)
-            .OrderBy(x => x.cborPropAttr!.IndexValue)
+            .Select(prop => (prop, cborPropAttrs: (IEnumerable<CborPropertyAttribute>?)Attribute.GetCustomAttributes(prop, typeof(CborPropertyAttribute))))
+            .Where(x => x.cborPropAttrs != null && x.cborPropAttrs.Any() && x.prop.GetValue(obj) != null)
+            .OrderBy(x => x.cborPropAttrs!.First().IndexValue)
             .ToList();
 
         writer.WriteStartArray(sortedProperties.Count);
@@ -217,10 +265,9 @@ public static class CborSerializerV2
     private static object? DeserializeObject(CborReader reader, Type targetType, CborRepresentation? overrideRepresentation = null)
     {
         var readState = reader.PeekState();
-        var cborTypeAttr = (CborTypeAttribute?)Attribute.GetCustomAttribute(targetType, typeof(CborTypeAttribute));
-
+        var cborTypeAttrs = (IEnumerable<CborTypeAttribute>?)Attribute.GetCustomAttributes(targetType, typeof(CborTypeAttribute));
+        var cborTypeAttr = cborTypeAttrs?.FirstOrDefault(x => ConvertCborRepresentationToState(x.Representation) == readState);
         var representationToUse = overrideRepresentation ?? cborTypeAttr?.Representation;
-
 
         if (cborTypeAttr != null)
         {
@@ -229,7 +276,7 @@ public static class CborSerializerV2
                 if (cborTypeAttr.IsBasicType)
                 {
                     // Assume there's a "Value" property and that its type matches the representation
-                    var valueProperty = targetType.GetProperty("Value") ?? throw new InvalidOperationException("A basic type must have a 'Value' property.");
+                    var valueProperty = targetType.GetProperty("CborValue") ?? throw new InvalidOperationException("A basic type must have a 'Value' property.");
                     var value = DeserializePrimitive(reader, valueProperty.PropertyType, cborTypeAttr.Representation);
 
                     // Create an instance and set the 'Value' property
@@ -285,6 +332,11 @@ public static class CborSerializerV2
                 Type t when t == typeof(ulong) => reader.ReadUInt64(),
                 Type t when t == typeof(string) => Convert.ToHexString(reader.ReadByteString()).ToLowerInvariant(),
                 Type t when t == typeof(bool) => reader.ReadBoolean(),
+                Type t when t == typeof(int?) => reader.ReadInt32(),
+                Type t when t == typeof(long?) => reader.ReadInt64(),
+                Type t when t == typeof(uint?) => reader.ReadUInt32(),
+                Type t when t == typeof(ulong?) => reader.ReadUInt64(),
+                Type t when t == typeof(bool?) => reader.ReadBoolean(),
                 _ => null
             };
         }
@@ -385,9 +437,12 @@ public static class CborSerializerV2
                 // Take into account that there might be multiple CborPropertyAttributes on the same property
                 var readState = reader.PeekState();
                 var cborPropAttrs = (CborPropertyAttribute[])Attribute.GetCustomAttributes(prop, typeof(CborPropertyAttribute));
-                var cborPropAttr = cborPropAttrs.FirstOrDefault(x => ConvertCborRepresentationToState(x.ValueType) == readState);
-                var deserializedValue = DeserializeObject(reader, prop.PropertyType, cborPropAttr?.ValueType);
-                prop.SetValue(instance, deserializedValue);
+                if (cborPropAttrs.Any() && !IsEndState(readState))
+                {
+                    var cborPropAttr = cborPropAttrs.FirstOrDefault(x => ConvertCborRepresentationToState(x.ValueType) == readState);
+                    var deserializedValue = DeserializeObject(reader, prop.PropertyType, cborPropAttr?.ValueType);
+                    prop.SetValue(instance, deserializedValue);
+                }
             });
 
         reader.ReadEndArray();
@@ -452,6 +507,11 @@ public static class CborSerializerV2
             CborRepresentation.Map => CborReaderState.StartMap,
             _ => throw new ArgumentException("Invalid CborRepresentation"),
         };
+    }
+
+    private static bool IsEndState(CborReaderState state)
+    {
+        return state == CborReaderState.EndArray || state == CborReaderState.EndMap;
     }
 
 

@@ -20,9 +20,9 @@ public class TransactionOutput
     [CborProperty(CborRepresentation.Int32, 0, CborRepresentation.ByteString)]
     public string Address { get; set; } = string.Empty;
 
-    [CborProperty(CborRepresentation.Int32, 1, CborRepresentation.Tuple)] 
     [CborProperty(CborRepresentation.Int32, 1, CborRepresentation.Int64, true)] 
-    public IValue Amount { get; set; } = new CoinValue();
+    [CborProperty(CborRepresentation.Int32, 1, CborRepresentation.Tuple)] 
+    public Value Amount { get; set; } = new Value();
 
     [CborProperty(CborRepresentation.Int32, 2, CborRepresentation.ByteString)]
     public string? DatumHash { get; set; }

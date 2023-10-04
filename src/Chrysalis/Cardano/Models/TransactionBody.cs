@@ -26,13 +26,13 @@ namespace Chrysalis.Cardano.Models;
 public class TransactionBody
 {
     [CborProperty(CborRepresentation.Int32, 0, CborRepresentation.Set)]
-    public TransactionInputs Inputs { get; set; } = new(); // Assuming TransactionInputs is a collection
+    public TransactionInputs Inputs { get; set; } = []; // Assuming TransactionInputs is a collection
 
     [CborProperty(CborRepresentation.Int32, 1, CborRepresentation.Array)]
-    public TransactionOutputs Outputs { get; set; } = new(); // Assuming TransactionOutputs is a collection
+    public TransactionOutputs Outputs { get; set; } = []; // Assuming TransactionOutputs is a collection
 
-    // [CborProperty(CborRepresentation.Int32, 2, CborRepresentation.Int32)]
-    // public CoinValue Fee { get; set; } = new();
+    [CborProperty(CborRepresentation.Int32, 2, CborRepresentation.Int32)]
+    public Value Fee { get; set; } = new();
 
     [CborProperty(CborRepresentation.Int32, 3, CborRepresentation.Int64)]
     public ulong? TTL { get; set; }

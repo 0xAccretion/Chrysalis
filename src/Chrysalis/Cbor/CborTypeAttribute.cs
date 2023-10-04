@@ -1,6 +1,6 @@
 ﻿namespace Chrysalis.Cbor;
 
-[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
 sealed class CborTypeAttribute(CborRepresentation representation) : Attribute
 {
     public CborRepresentation Representation { get; } = representation;

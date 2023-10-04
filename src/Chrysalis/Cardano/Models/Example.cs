@@ -11,6 +11,6 @@ public record Example
     [CborProperty(CborRepresentation.Int32, 1, CborRepresentation.Int32)]
     public int Index { get; set; } = 0;
 
-    [CborProperty(CborRepresentation.Int32, 2, CborRepresentation.Array)]
+    [CborProperty(CborRepresentation.Int32, 2, CborRepresentation.Tuple)]
     public Example? Examples { get; set; }
 }

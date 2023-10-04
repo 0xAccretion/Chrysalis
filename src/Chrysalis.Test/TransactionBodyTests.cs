@@ -14,7 +14,7 @@ public class TransactionBodyTests
     {
         // Given
         // Replace the hex string with your real hex-encoded CBOR data for a TransactionBody
-        byte[] originalCborData = Convert.FromHexString(TransactionBodyTests.originHex);
+        byte[] originalCborData = Convert.FromHexString(originHex);
 
         // When (Deserialization)
         var deserializedTransactionBody = CborSerializerV2.Deserialize<TransactionBody>(originalCborData);
