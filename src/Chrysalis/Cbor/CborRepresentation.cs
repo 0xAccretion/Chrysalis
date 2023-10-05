@@ -12,5 +12,6 @@ public enum CborRepresentation
     Set,
     Array,
     Record,
-    Map
+    Map,
+    Ignore
 }

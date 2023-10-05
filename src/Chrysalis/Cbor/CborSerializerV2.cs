@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.VisualBasic;
+using System.Reflection;
 
 namespace Chrysalis.Cbor;
 
@@ -96,7 +97,7 @@ public static class CborSerializerV2
         }
         else
         {
-            
+
             var cborPropAttrs = (IEnumerable<CborPropertyAttribute>?)Attribute.GetCustomAttributes(objType, typeof(CborPropertyAttribute));
             if (cborPropAttrs is not null && cborPropAttrs.Any())
             {
@@ -304,6 +305,12 @@ public static class CborSerializerV2
 
     private static object? DeserializePrimitive(CborReader reader, Type targetType, CborRepresentation? representation)
     {
+        if(reader.PeekState() == CborReaderState.Null)
+        {
+            reader.ReadNull();
+            return null;
+        }
+
         if (representation != null)
         {
             return representation switch
@@ -319,6 +326,7 @@ public static class CborSerializerV2
                 CborRepresentation.UInt64 => reader.ReadUInt64(),
                 CborRepresentation.ByteString => Convert.ToHexString(reader.ReadByteString()).ToLowerInvariant(),
                 CborRepresentation.Bool => reader.ReadBoolean(),
+                CborRepresentation.Ignore => DeserializeIgnore(reader),
                 _ => throw new NotImplementedException("Unknown CborRepresentation"),
             };
         }
@@ -440,8 +448,16 @@ public static class CborSerializerV2
                 if (cborPropAttrs.Any() && !IsEndState(readState))
                 {
                     var cborPropAttr = cborPropAttrs.FirstOrDefault(x => ConvertCborRepresentationToState(x.ValueType) == readState);
-                    var deserializedValue = DeserializeObject(reader, prop.PropertyType, cborPropAttr?.ValueType);
-                    prop.SetValue(instance, deserializedValue);
+                    if (IsIgnoreProperty(prop))
+                    {
+                        DeserializeObject(reader, prop.PropertyType, CborRepresentation.Ignore);
+                        prop.SetValue(instance, null);
+                    }
+                    else
+                    {
+                        var deserializedValue = DeserializeObject(reader, prop.PropertyType, cborPropAttr?.ValueType);
+                        prop.SetValue(instance, deserializedValue);
+                    }
                 }
             });
 
@@ -490,6 +506,44 @@ public static class CborSerializerV2
         return obj;
     }
 
+    private static bool IsIgnoreProperty(PropertyInfo prop)
+    {
+        var cborPropAttrs = (CborPropertyAttribute[])Attribute.GetCustomAttributes(prop, typeof(CborPropertyAttribute));
+        return cborPropAttrs.Any(x => x.ValueType == CborRepresentation.Ignore);
+    }
+
+    private static object? DeserializeIgnore(CborReader reader)
+    {
+        switch (reader.PeekState())
+        {
+            case CborReaderState.StartArray:
+                reader.ReadStartArray();
+                while (reader.PeekState() != CborReaderState.EndArray)
+                {
+                    DeserializeIgnore(reader);
+                }
+                reader.ReadEndArray();
+                break;
+
+            case CborReaderState.StartMap:
+                reader.ReadStartMap();
+                while (reader.PeekState() != CborReaderState.EndMap)
+                {
+                    DeserializeIgnore(reader); // Key
+                    DeserializeIgnore(reader); // Value
+                }
+                reader.ReadEndMap();
+                break;
+
+            default:
+                reader.SkipValue();  // For all other simple CBOR types, this should suffice
+                break;
+        }
+
+        return null;
+    }
+
+
     private static CborReaderState ConvertCborRepresentationToState(CborRepresentation representation)
     {
         return representation switch
@@ -505,6 +559,7 @@ public static class CborSerializerV2
             CborRepresentation.Array => CborReaderState.StartArray,
             CborRepresentation.Record => CborReaderState.StartMap,
             CborRepresentation.Map => CborReaderState.StartMap,
+            CborRepresentation.Ignore => CborReaderState.Null,
             _ => throw new ArgumentException("Invalid CborRepresentation"),
         };
     }
