@@ -51,4 +51,4 @@ jobs:
 
     - name: Push to NuGet
       run: dotnet nuget push ./src/out/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
-      if: github.event_name == 'published'
+      if: github.event_name == 'release'
