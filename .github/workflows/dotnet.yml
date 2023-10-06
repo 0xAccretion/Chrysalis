@@ -10,6 +10,8 @@ on:
     branches: [ "main" ]
   create:
     types: [tag]
+  release:
+    types: [published]
 
 jobs:
   build:
