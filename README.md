@@ -25,7 +25,7 @@ Chrysalis is an open-source .NET library designed to facilitate the serializatio
 
 To use Chrysalis in your .NET project:
 
-1. ** Install Instructions **
+1. `dotnet add package Chrysalis --version 0.0.6`
 2. Example Usage
     
     CBOR (De)serialization

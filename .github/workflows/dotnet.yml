@@ -19,10 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-    - name: Echo event name
-      run: echo ${{ github.event_name }}
-
+    
     - uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
