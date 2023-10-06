@@ -1,5 +1,7 @@
 # Chrysalis: Cardano Serialization Library for .NET 🦋
 
+[![.NET](https://github.com/0xAccretion/Chrysalis/actions/workflows/dotnet.yml/badge.svg)](https://github.com/0xAccretion/Chrysalis/actions/workflows/dotnet.yml)
+
 Chrysalis is an open-source .NET library designed to facilitate the serialization and deserialization of Cardano blockchain data structures. With a strong focus on adhering to the Cardano standards and enhancing the .NET Cardano developer ecosystem, Chrysalis aims to provide developers with a reliable and consistent toolkit for working with Cardano.
 
 🚧 **NOTE:** This library is currently a work in progress. Feedback and contributions are welcome!
