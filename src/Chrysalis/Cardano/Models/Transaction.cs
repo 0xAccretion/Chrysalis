@@ -27,6 +27,6 @@ public class Transaction
     [CborProperty(CborRepresentation.Int32, 2, CborRepresentation.Bool)]
     public bool IsValid { get; set; }
 
-    [CborProperty(CborRepresentation.Int32, 3, CborRepresentation.ByteString, true)]
+    [CborProperty(CborRepresentation.Int32, 3, CborRepresentation.Ignore)]
     public string? AuxiliaryData { get; set; }
 }

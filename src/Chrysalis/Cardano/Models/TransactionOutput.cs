@@ -18,7 +18,7 @@ namespace Chrysalis.Cardano.Models;
 public class TransactionOutput
 {
     [CborProperty(CborRepresentation.Int32, 0, CborRepresentation.ByteString)]
-    public string Address { get; set; } = string.Empty;
+    public string AddressHex { get; set; } = string.Empty;
 
     [CborProperty(CborRepresentation.Int32, 1, CborRepresentation.Int64, true)] 
     [CborProperty(CborRepresentation.Int32, 1, CborRepresentation.Tuple)] 
@@ -26,4 +26,6 @@ public class TransactionOutput
 
     [CborProperty(CborRepresentation.Int32, 2, CborRepresentation.ByteString)]
     public string? DatumHash { get; set; }
+    
+    public Address Address => Address.FromHex(AddressHex);
 }

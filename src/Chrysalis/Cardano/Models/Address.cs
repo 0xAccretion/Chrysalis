@@ -166,5 +166,18 @@ public class Address
             _ => throw new InvalidOperationException($"Address type {AddressType} does not contain a StakeKeyHash."),
         };
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not Address other)
+            return false;
+
+        return Header == other.Header && Payload.SequenceEqual(other.Payload);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Header, Payload);
+    }
 }
 
