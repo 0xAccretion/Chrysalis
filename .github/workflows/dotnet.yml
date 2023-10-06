@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    
+
     - name: Echo event name
       run: echo ${{ github.event_name }}
 
@@ -51,5 +51,4 @@ jobs:
 
     - name: Push to NuGet
       run: dotnet nuget push ./src/out/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
-      if: github.event.action == 'published'
-      working-directory: ./src
+      if: github.event_name == 'published'
