@@ -8,7 +8,7 @@
  * 
  * Thanks to the authors and contributors of these projects for their valuable work.
  */
- 
+
 using System.Buffers;
 using System.Text;
 
@@ -123,19 +123,26 @@ public static class Bech32
         return result.WrittenSpan.ToArray();
     }
 
-    public static byte[] Decode(string bech32EncodedString, out byte witVer, out string hrp)
+    public static (string hrp, byte[] data) Decode(string bech32EncodedString)
     {
-        byte[] b32Arr = Bech32Decode(bech32EncodedString, out hrp);
+        byte[] b32Arr = Bech32Decode(bech32EncodedString, out string hrp);
+
         if (b32Arr.Length < checkSumSize)
         {
             throw new FormatException("Invalid data length.");
         }
 
-        byte[] data = b32Arr.SubArray(0, b32Arr.Length - checkSumSize);
-        byte[] b256Arr = ConvertBits(data, 5, 8, false) ?? throw new FormatException("Invalid data format.");
-        witVer = b32Arr[0];
-        return b256Arr;
+        if (!VerifyChecksum(hrp, b32Arr))
+        {
+            throw new FormatException("Invalid checksum.");
+        }
+
+        byte[] dataPart = b32Arr.SubArray(0, b32Arr.Length - checkSumSize);
+        byte[] b256Arr = ConvertBits(dataPart, 5, 8, false) ?? throw new FormatException("Invalid data format.");
+
+        return (hrp, b256Arr);
     }
+
 
     private static byte[] Bech32Decode(string bech32EncodedString, out string hrp)
     {
@@ -183,6 +190,12 @@ public static class Bech32
         byte[] result = new byte[count];
         Buffer.BlockCopy(sourceArray, index, result, 0, count);
         return result;
+    }
+
+    private static bool VerifyChecksum(string hrp, byte[] data)
+    {
+        byte[] temp = ExpandHrp(hrp).ConcatFast(data);
+        return Polymod(temp) == 1;
     }
 }
 

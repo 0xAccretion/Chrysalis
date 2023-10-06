@@ -18,8 +18,9 @@ public enum AddressType
     PaymentKeyHash_Pointer = 0x40,      // 0100....
     ScriptHash_Pointer = 0x50,          // 0101....
     PaymentKeyHash = 0x60,              // 0110....
-    ScriptHash = 0x70                   // 0111....
-    // Add other Shelley address types as needed
+    ScriptHash = 0x70,                   // 0111....
+    Reward_StakeKeyHash = 0xE0, // 1110.... Corresponding to (14)
+    Reward_ScriptHash = 0xF0,  // 1111.... Corresponding to (15)
 }
 
 public class Address
@@ -70,6 +71,71 @@ public class Address
 
         return new Address(header, payload);
     }
+
+    public static Address FromBytes(byte[] addressBytes)
+    {
+        if (addressBytes.Length < 2)
+            throw new ArgumentException("Address bytes should be at least 2 bytes long.", nameof(addressBytes));
+
+        // Use Span for slicing without new array allocations
+        byte header = addressBytes[0];
+        byte[] payload = addressBytes.AsSpan(1).ToArray();
+
+        return new Address(header, payload);
+    }
+
+    public static Address FromBech32(string bech32String)
+    {
+        // Decode the Bech32 string
+        var (_, data) = Bech32.Decode(bech32String);
+
+        // The first byte of the data is your header (based on your previous methods)
+        byte header = data[0];
+
+        // The rest is your payload
+        byte[] payload = data.AsSpan(1).ToArray();
+
+        return new Address(header, payload);
+    }
+
+    public string ToHex()
+    {
+        return ToHex(this);
+    }
+
+    public string ToBech32()
+    {
+        // Determine the hrp based on NetworkTag and AddressType
+        string hrp = GetHrp();
+
+        // Combine the header and payload into a single byte array.
+        var combinedData = new byte[Payload.Length + 1];
+        combinedData[0] = Header;
+        Array.Copy(Payload, 0, combinedData, 1, Payload.Length);
+
+        return Bech32.Encode(hrp, combinedData); // Assuming you have the Bech32 class in scope
+    }
+
+    private string GetHrp()
+    {
+        string networkPart = NetworkTag switch
+        {
+            NetworkTag.Testnet => "_test",
+            NetworkTag.Mainnet => "",
+            _ => throw new InvalidOperationException("Unsupported NetworkTag.")
+        };
+
+        string typePart = IsStakeAddress() ? "stake" : "addr";
+
+        return $"{typePart}{networkPart}";
+    }
+
+
+    private bool IsStakeAddress()
+    {
+        return AddressType == AddressType.Reward_StakeKeyHash || AddressType == AddressType.Reward_ScriptHash;
+    }
+
 
     public byte[] GetPaymentKeyHash()
     {

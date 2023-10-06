@@ -7,18 +7,18 @@ public class Bech32Test
     {
         // Arrange
         var hrp = "addr"; // For Shelley addresses
-        byte[] data = Convert.FromHexString("01e63022b0f461602484968bb10fd8f872787b862ace2d7e943292a37003ec6a12860ef8c07d4c1a8de7df06acb0f0330a6087ecbe972082a7");
+        byte[] data = Convert.FromHexString("019493315cd92eb5d8c4304e67b7e16ae36d61d34502694657811a2c8e337b62cfff6403a06a3acbc34f8c46003c69fe79a3628cefa9c47251");
 
         // You can find a real-world example or use a known good library to generate an expected result.
-        var expectedBech32String = "addr1q8nrqg4s73skqfyyj69mzr7clpe8s7ux9t8z6l55x2f2xuqra34p9pswlrq86nq63hna7p4vkrcrxznqslkta9eqs2nscfavlf"; // replace ... with the expected encoding
+        var expectedBech32String = "addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3n0d3vllmyqwsx5wktcd8cc3sq835lu7drv2xwl2wywfgse35a3x"; // replace ... with the expected encoding
 
         // Act
         var result = Bech32.Encode(hrp, data);
-        var decodedResult = Bech32.Decode(result, out var witVer, out var decodedHrp);
+        (var decodedHrp, var payload) = Bech32.Decode(result);
 
         // Assert
         Assert.Equal(expectedBech32String, result);
         Assert.Equal(hrp, decodedHrp);
-        Assert.True(data.SequenceEqual(decodedResult));
+        Assert.True(data.SequenceEqual(payload));
     }
 }
