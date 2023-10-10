@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.0.6</Version>
+    <Version>0.0.7</Version>
     <PackageId>Chrysalis</PackageId>
     <Authors>0xAccretion</Authors>
     <Company>AccretionLabs</Company>
@@ -13,11 +13,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="SauceControl.Blake2Fast" Version="2.0.0" />
     <PackageReference Include="System.Formats.Cbor" Version="8.0.0-rc.1.23419.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../../LICENSE.md" Pack="true" PackagePath=""/>
-    <None Include="../../README.md" Pack="true" PackagePath=""/>
+    <None Include="../../LICENSE.md" Pack="true" PackagePath="" />
+    <None Include="../../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>

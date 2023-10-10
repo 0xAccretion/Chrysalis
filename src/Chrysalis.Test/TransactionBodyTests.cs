@@ -1,4 +1,5 @@
-﻿using Chrysalis.Cardano.Models;
+﻿using Blake2Fast;
+using Chrysalis.Cardano.Models;
 using Chrysalis.Cbor;
 
 namespace Chrysalis.Test;

@@ -13,5 +13,6 @@ public class TransactionTest
         var originalTransaction = CborSerializerV2.FromHex<Transaction>(originalTransactionCborHex)!;
         var serializedTransaction = CborSerializerV2.Serialize(originalTransaction);
         var deserializedTransaction = CborSerializerV2.Deserialize<Transaction>(serializedTransaction);
+        var txId = originalTransaction.Id;
     }
 }

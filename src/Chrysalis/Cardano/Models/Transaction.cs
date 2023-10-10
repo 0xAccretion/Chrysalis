@@ -1,4 +1,5 @@
 using System.Formats.Cbor;
+using Blake2Fast;
 using Chrysalis.Cbor;
 
 namespace Chrysalis.Cardano.Models;
@@ -29,4 +30,6 @@ public class Transaction
 
     [CborProperty(CborRepresentation.Int32, 3, CborRepresentation.Ignore)]
     public string? AuxiliaryData { get; set; }
+
+    public string Id => Convert.ToHexString(Blake2b.ComputeHash(32, CborSerializerV2.Serialize(TransactionBody))).ToLowerInvariant();
 }

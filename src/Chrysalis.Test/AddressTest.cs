@@ -69,7 +69,7 @@ public class AddressTest
         var (hrp, data) = Bech32.Decode(inputBech32);
 
         // Create an Address object from decoded data
-        Address address = Address.FromBytes(data); // I'm assuming Address has such a method.
+        Address address = Address.FromBytes(data);
 
         // Encode the Address object back to Bech32
         string outputBech32 = address.ToBech32();
